@@ -1,0 +1,120 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom heritage theme */
+@layer base {
+  * {
+    @apply box-border;
+  }
+  
+  body {
+    @apply bg-heritage-beige text-heritage-text font-heritage;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+}
+
+@layer components {
+  /* ====== BUTTONS ====== */
+  .btn-heritage {
+    @apply bg-heritage-button text-white px-6 py-3 rounded-lg font-semibold 
+           hover:bg-heritage-button-hover transition-all duration-300 
+           active:scale-[0.98] shadow-md;
+  }
+  
+  .btn-heritage-secondary {
+    @apply bg-heritage-beige text-heritage-text border-2 border-heritage-border 
+           px-6 py-3 rounded-lg font-semibold hover:bg-heritage-border 
+           transition-all duration-300;
+  }
+  
+  /* ====== CARDS ====== */
+  .card-heritage {
+    @apply bg-white rounded-xl shadow-heritage-md border border-heritage-border 
+           p-6 hover:shadow-heritage-lg transition-shadow duration-300;
+  }
+  
+  /* ====== INPUTS ====== */
+  .input-heritage {
+    @apply w-full p-3 border-2 border-heritage-border rounded-lg 
+           bg-heritage-light-beige text-heritage-text
+           focus:border-heritage-primary-brown focus:ring-2 
+           focus:ring-heritage-primary-brown/20 focus:outline-none
+           placeholder:text-heritage-border/70 transition-all duration-300;
+  }
+  
+  /* ====== NAVIGATION ====== */
+  .nav-heritage {
+    @apply bg-white shadow-md border-b border-heritage-border;
+  }
+  
+  .nav-link-heritage {
+    @apply text-heritage-text hover:text-heritage-primary-brown 
+           font-medium transition-colors duration-300;
+  }
+  
+  .nav-link-heritage-active {
+    @apply text-heritage-primary-brown font-semibold;
+  }
+  
+  /* ====== BADGES ====== */
+  .badge-heritage {
+    @apply px-3 py-1 bg-heritage-primary-brown/10 text-heritage-primary-brown 
+           rounded-full text-sm font-medium;
+  }
+  
+  /* ====== LOGO ====== */
+  .logo-heritage {
+    @apply w-12 h-12 bg-gradient-to-br from-heritage-primary-brown 
+           to-heritage-dark-brown rounded-xl flex items-center justify-center 
+           shadow-lg;
+  }
+  
+  .logo-text-heritage {
+    @apply text-white font-bold text-xl;
+  }
+  
+  /* ====== CONTAINERS ====== */
+  .container-heritage {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* ====== PATTERNS (Alternative using Tailwind) ====== */
+  .pattern-top-heritage {
+    @apply h-12 bg-gradient-to-r from-heritage-primary-brown/10 via-heritage-primary-brown/5 to-heritage-primary-brown/10;
+  }
+  
+  .pattern-bottom-heritage {
+    @apply h-12 bg-gradient-to-r from-heritage-dark-brown/10 via-heritage-dark-brown/5 to-heritage-dark-brown/10;
+  }
+}
+
+/* Custom patterns CSS */
+.pattern-top-custom {
+  height: 48px;
+  background: linear-gradient(135deg, 
+    rgba(156, 79, 46, 0.1) 25%, 
+    transparent 25%, 
+    transparent 50%, 
+    rgba(156, 79, 46, 0.1) 50%, 
+    rgba(156, 79, 46, 0.1) 75%, 
+    transparent 75%, 
+    transparent);
+  background-size: 40px 40px;
+}
+
+.pattern-bottom-custom {
+  height: 48px;
+  background: linear-gradient(45deg, 
+    rgba(107, 47, 26, 0.1) 25%, 
+    transparent 25%, 
+    transparent 50%, 
+    rgba(107, 47, 26, 0.1) 50%, 
+    rgba(107, 47, 26, 0.1) 75%, 
+    transparent 75%, 
+    transparent);
+  background-size: 40px 40px;
+}
