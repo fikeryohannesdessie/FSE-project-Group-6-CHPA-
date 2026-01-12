@@ -1,9 +1,11 @@
-﻿import React, { useState } from "react";
 import HeritageLayout from "../components/HeritageLayout";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiUpload, FiFile, FiTag, FiGlobe, FiType, FiCalendar } from "react-icons/fi";
 
 const Upload = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -12,16 +14,31 @@ const Upload = () => {
     origin: "",
     date: "",
   });
+
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+
+  const categories = [
+    "Manuscript", "Artifact", "Music", "Oral Tradition",
+    "Recipe", "Dance", "Ritual", "Historical Document",
+    "Photograph", "Video"
+  ];
+
+  const languages = [
+    "Amharic", "English", "Oromo", "Tigrinya",
+    "Somali", "Afar", "Geez"
+  ];
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0] || null);
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -36,92 +53,51 @@ const Upload = () => {
     setUploading(true);
 
     try {
-      // 1) Upload media to the backend route that works in Postman
+      // STEP 1: Upload media file
       const mediaData = new FormData();
       mediaData.append("media", file);
 
-      const mediaRes = await fetch("http://localhost:3001/upload", {
+      const uploadRes = await fetch("http://localhost:3001/media/upload", {
         method: "POST",
-        body: mediaData,
+        body: mediaData
       });
 
-      if (!mediaRes.ok) {
-        const text = await mediaRes.text();
-        console.error("Media upload failed:", mediaRes.status, text);
-        throw new Error(`Media upload failed: ${mediaRes.status}`);
+      const uploadResult = await uploadRes.json();
+
+      if (!uploadRes.ok) {
+        throw new Error("Media upload failed");
       }
 
-      let mediaResult;
-      try {
-        mediaResult = await mediaRes.json();
-      } catch {
-        const raw = await mediaRes.text();
-        console.warn("Media upload returned non-JSON body:", raw);
-        mediaResult = { raw };
-      }
-
-      console.log("media upload result:", mediaResult);
-
-      // Build media paths (robust for different backend key names)
-      const mediaPath =
-        mediaResult.original ||
-        mediaResult.originalPath ||
-        mediaResult.path ||
-        mediaResult.filePath ||
-        mediaResult.filename ||
-        (typeof mediaResult === "string" ? mediaResult : null);
-
-      const optimizedPath =
-        mediaResult.optimized || mediaResult.optimizedPath || null;
-
-      // 2) Create the heritage item
-      // Include role: "contributor" to satisfy backend role requirement (demo-friendly)
-      const itemPayload = {
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
-        language: formData.language,
-        origin: formData.origin,
-        date: formData.date,
-
-        // TEMPORARY: role in body to satisfy backend check (replace with auth token flow later)
-        role: "contributor",
-
-        // file path fields (send multiple common names)
-        media_path: mediaPath,
-        optimized_path: optimizedPath,
-        originalFile: mediaPath,
-        optimizedFile: optimizedPath,
-      };
-
-      console.log("item payload being sent:", itemPayload);
-
-      const itemRes = await fetch("http://localhost:3001/items", {
+      // STEP 2: Save heritage item metadata
+      const itemRes = await fetch("http://localhost:3001/items/items", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(itemPayload),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          language: formData.language,
+          origin: formData.origin,
+          date: formData.date,
+          media_path: uploadResult.original,
+          optimized_path: uploadResult.optimized
+        })
       });
 
-      // Read response (try JSON, fallback to text)
-      let itemBody;
-      try {
-        itemBody = await itemRes.json();
-      } catch {
-        itemBody = await itemRes.text();
-      }
+      const itemResult = await itemRes.json();
 
       if (!itemRes.ok) {
-        console.error("Item creation failed:", itemRes.status, itemBody);
-        throw new Error(`Item creation failed: ${itemRes.status} - see console`);
+        throw new Error("Item creation failed");
       }
-
-      console.log("item creation result:", itemRes.status, itemBody);
 
       alert("Item uploaded successfully! Awaiting admin approval.");
       navigate("/dashboard");
+
     } catch (err) {
-      console.error("Upload error:", err);
-      setError(err.message || "Upload failed. Please try again.");
+      console.error(err);
+      setError("Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -135,65 +111,102 @@ const Upload = () => {
             Upload Cultural Heritage Item
           </h1>
 
+          <p className="text-gray-600 mb-8">
+            Preserve Ethiopia's cultural heritage by uploading artifacts or media.
+          </p>
+
           {error && (
             <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-8">
+
+            {/* Title */}
+            <div>
+              <label className="block text-gray-700 mb-2 flex items-center gap-2">
+                <FiType /> Title *
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                className="w-full p-3 border rounded-lg"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-gray-700 mb-2">Description *</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows="5"
+                className="w-full p-3 border rounded-lg"
+                required
+              />
+            </div>
+
+            {/* Category, Language, Date */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="p-3 border rounded-lg"
+                required
+              >
+                <option value="">Select category</option>
+                {categories.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+
+              <select
+                name="language"
+                value={formData.language}
+                onChange={handleChange}
+                className="p-3 border rounded-lg"
+              >
+                {languages.map(l => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+
+              <input
+                type="text"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                placeholder="e.g. 19th Century"
+                className="p-3 border rounded-lg"
+              />
+            </div>
+
+            {/* Origin */}
             <input
               type="text"
-              name="title"
-              placeholder="Title"
-              value={formData.title}
+              name="origin"
+              value={formData.origin}
               onChange={handleChange}
-              required
-              className="w-full p-3 border rounded"
+              placeholder="Origin / Region"
+              className="w-full p-3 border rounded-lg"
             />
 
-            <textarea
-              name="description"
-              placeholder="Description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border rounded"
-            />
+            {/* File */}
+            <input type="file" onChange={handleFileChange} />
 
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-              className="w-full p-3 border rounded"
-            >
-              <option value="">Select category</option>
-              <option>Manuscript</option>
-              <option>Artifact</option>
-              <option>Music</option>
-              <option>Oral Tradition</option>
-              <option>Recipe</option>
-              <option>Dance</option>
-              <option>Ritual</option>
-              <option>Historical Document</option>
-              <option>Photograph</option>
-              <option>Video</option>
-            </select>
-
-            <input
-              type="file"
-              accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
-              onChange={handleFileChange}
-              required
-            />
-
+            {/* Buttons */}
             <button
               type="submit"
               disabled={uploading}
-              className="bg-blue-600 text-white px-6 py-3 rounded"
+              className="w-full bg-blue-600 text-white p-3 rounded-lg"
             >
-              {uploading ? "Uploading..." : "Upload"}
+              {uploading ? "Uploading..." : "Upload Cultural Item"}
             </button>
           </form>
         </div>
