@@ -6,7 +6,7 @@ const { requireRole } = require("../middleware/authorize");
 
 router.post(
   "/items",
-  requireRole("contributor"),
+  // requireRole("contributor"),
   heritageItemController.createItem
 );
 
