@@ -1,8 +1,10 @@
-﻿import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff, FiLoader } from "react-icons/fi";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -13,47 +15,47 @@ const Login = () => {
   const validateEmail = (value) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address.");
+  try {
+    const response = await fetch("http://localhost:3001/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email,
+        password
+      })
+    });
+
+    const data = await response.json();
+
+    // ❌ LOGIN FAILED
+    if (!response.ok) {
+      setError(data.message || "Login failed");
       return;
     }
 
-    setError("");
-    setLoading(true);
+    // ✅ LOGIN SUCCESS
+    console.log("Logged in user:", data.user);
 
-    // Simulate login delay
-    fetch("http://localhost:3001/auth/login", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    email,
-    password
-  })
-})
-    
+    // OPTIONAL: store user (recommended)
+    localStorage.setItem("user", JSON.stringify(data.user));
 
-  .then((res) => res.json())
-  .then((data) => {
-    setLoading(false);
+    // ✅ NAVIGATE
+    navigate("/dashboard");
 
-    if (data.error) {
-      setError(data.error);
-    } else {
-      alert("Logged in successfully!");
-      console.log("User:", data);
-    }
-  })
-  .catch((err) => {
-    setLoading(false);
-    setError("Server error. Try again later.");
-  });
+  } catch (err) {
+    console.error(err);
+    setError("Server error. Please try again.");
+  }
 };
 
+    
+  // ← THIS LINE IS CRITICAL
 
   return (
     <div className="min-h-screen bg-heritage-beige">
@@ -174,4 +176,3 @@ const Login = () => {
 };
 
 export default Login;
-
