@@ -1,12 +1,29 @@
 const db = require("../database/db");
 
-exports.findByUsername = (username, callback) => {
-  const sql = "SELECT * FROM users WHERE username = ?";
+exports.findByEmail = (email, callback) => {
+  db.get(
+    "SELECT * FROM users WHERE email = ?",
+    [email],
+    callback
+  );
+};
 
-  db.get(sql, [username], (err, row) => {
-    if (err) {
-      return callback(err);
-    }
-    callback(null, row);
-  });
+/**
+ * (Optional) Find user by username
+ * Keep this if other parts still use it
+ */
+exports.findByUsername = (username, callback) => {
+  db.get(
+    "SELECT * FROM users WHERE username = ?",
+    [username],
+    callback
+  );
+};
+exports.create = (user, callback) => {
+  db.run(
+    `INSERT INTO users (username, email, password, role)
+     VALUES (?, ?, ?, ?)`,
+    [user.username, user.email, user.password, user.role],
+    callback
+  );
 };
