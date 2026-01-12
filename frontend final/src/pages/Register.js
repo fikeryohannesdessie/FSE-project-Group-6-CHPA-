@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiUser, FiArrowLeft } from "react-icons/fi";
 
@@ -32,9 +32,10 @@ const Register = () => {
     "Content-Type": "application/json"
   },
   body: JSON.stringify({
-    username: formData.username,
+    username: formData.name,
     email: formData.email,
-    password: formData.password
+    password: formData.password,
+    role: formData.role
   })
 })
   .then((res) => res.json())
