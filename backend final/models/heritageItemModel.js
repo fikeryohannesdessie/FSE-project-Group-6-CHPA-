@@ -50,7 +50,7 @@ exports.approve = (id, callback) => {
       return callback(err);
     }
 
-    //  VERY IMPORTANT CHECK
+    // 🔴 VERY IMPORTANT CHECK
     if (this.changes === 0) {
       return callback(new Error("Item not found"));
     }
