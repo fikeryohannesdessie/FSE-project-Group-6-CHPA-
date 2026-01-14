@@ -8,10 +8,6 @@ exports.findByEmail = (email, callback) => {
   );
 };
 
-/**
- * (Optional) Find user by username
- * Keep this if other parts still use it
- */
 exports.findByUsername = (username, callback) => {
   db.get(
     "SELECT * FROM users WHERE username = ?",
