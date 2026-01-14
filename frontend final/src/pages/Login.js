@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff, FiLoader } from "react-icons/fi";
-
 const Login = () => {
   const navigate = useNavigate();
 
@@ -18,6 +17,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");
+  setLoading(true);
 
   try {
     const response = await fetch("http://localhost:3001/auth/login", {
@@ -25,32 +25,32 @@ const Login = () => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        email,
-        password
-      })
+      body: JSON.stringify({ email, password })
     });
 
-    const data = await response.json();
+    const data = await response.json(); // ✅ READ ONCE
 
-    // ❌ LOGIN FAILED
     if (!response.ok) {
       setError(data.message || "Login failed");
+      setLoading(false);
       return;
     }
 
-    // ✅ LOGIN SUCCESS
-    console.log("Logged in user:", data.user);
-
-    // OPTIONAL: store user (recommended)
+    // ✅ PATCH: store logged-in user
     localStorage.setItem("user", JSON.stringify(data.user));
 
-    // ✅ NAVIGATE
-    navigate("/dashboard");
+if (data.user.role === "admin") {
+  navigate("/admin");
+} else {
+  navigate("/dashboard");
+}
+
 
   } catch (err) {
     console.error(err);
     setError("Server error. Please try again.");
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -154,7 +154,7 @@ const Login = () => {
               )}
             </button>
 
-            {/* Register */}
+            {/* Register */
             <div className="text-center pt-6 border-t border-heritage-border">
               <p className="text-heritage-text">
                 Don't have an account?{" "}
