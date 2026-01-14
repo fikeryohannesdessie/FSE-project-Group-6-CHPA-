@@ -21,7 +21,8 @@ exports.login = (req, res) => {
       return res.status(401).json({ message: "Invalid password" });
     }
 
-    res.json({
+    // ✅ IMPORTANT: user is ONLY used here (inside scope)
+    return res.json({
       message: "Login successful",
       user: {
         id: user.id,
@@ -32,6 +33,7 @@ exports.login = (req, res) => {
     });
   });
 };
+
 exports.register = (req, res) => {
   const { username, email, password, role } = req.body;
 
@@ -51,5 +53,3 @@ exports.register = (req, res) => {
     }
   );
 };
-
-
