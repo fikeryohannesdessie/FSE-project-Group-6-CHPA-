@@ -53,43 +53,34 @@ const Upload = () => {
     setUploading(true);
 
     try {
-      // STEP 1: Upload media file
-      const mediaData = new FormData();
-      mediaData.append("media", file);
+      const user = JSON.parse(localStorage.getItem("user"));
 
-      const uploadRes = await fetch("http://localhost:3001/media/upload", {
-        method: "POST",
-        body: mediaData
-      });
-
-      const uploadResult = await uploadRes.json();
-
-      if (!uploadRes.ok) {
-        throw new Error("Media upload failed");
+      if (!user) {
+        setError("You must be logged in to upload.");
+        return;
       }
 
-      // STEP 2: Save heritage item metadata
-      const itemRes = await fetch("http://localhost:3001/items/items", {
+      //  USE A DIFFERENT VARIABLE NAME
+      const uploadData = new FormData();
+      uploadData.append("media", file);
+      uploadData.append("title", formData.title);
+      uploadData.append("description", formData.description);
+      uploadData.append("category", formData.category);
+      uploadData.append("language", formData.language);
+      uploadData.append("origin", formData.origin);
+      uploadData.append("date", formData.date);
+      uploadData.append("uploaded_by", user.id);
+
+      const response = await fetch("http://localhost:3001/media/upload", {
+
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          category: formData.category,
-          language: formData.language,
-          origin: formData.origin,
-          date: formData.date,
-          media_path: uploadResult.original,
-          optimized_path: uploadResult.optimized
-        })
+        body: uploadData,
       });
 
-      const itemResult = await itemRes.json();
+      const result = await response.json();
 
-      if (!itemRes.ok) {
-        throw new Error("Item creation failed");
+      if (!response.ok) {
+        throw new Error(result.message || "Upload failed");
       }
 
       alert("Item uploaded successfully! Awaiting admin approval.");
@@ -122,7 +113,6 @@ const Upload = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
-
             {/* Title */}
             <div>
               <label className="block text-gray-700 mb-2 flex items-center gap-2">
@@ -200,7 +190,6 @@ const Upload = () => {
             {/* File */}
             <input type="file" onChange={handleFileChange} />
 
-            {/* Buttons */}
             <button
               type="submit"
               disabled={uploading}
