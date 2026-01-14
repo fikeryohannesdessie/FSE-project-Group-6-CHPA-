@@ -28,7 +28,7 @@ const Login = () => {
       body: JSON.stringify({ email, password })
     });
 
-    const data = await response.json(); // ✅ READ ONCE
+    const data = await response.json(); // READ ONCE
 
     if (!response.ok) {
       setError(data.message || "Login failed");
@@ -36,7 +36,7 @@ const Login = () => {
       return;
     }
 
-    // ✅ PATCH: store logged-in user
+    //  PATCH: store logged-in user
     localStorage.setItem("user", JSON.stringify(data.user));
 
 if (data.user.role === "admin") {
@@ -53,9 +53,6 @@ if (data.user.role === "admin") {
     setLoading(false);
   }
 };
-
-    
-  // ← THIS LINE IS CRITICAL
 
   return (
     <div className="min-h-screen bg-heritage-beige">
