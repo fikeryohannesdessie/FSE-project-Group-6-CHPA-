@@ -4,10 +4,24 @@ import { FiMenu, FiX, FiLogOut, FiMoon, FiSun } from "react-icons/fi";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import Footer from "../components/Footer";
 
-const mockUser = {
-  name: "Amanuel Solomon",
-  role: "admin", // change to "user" to test hiding Admin
-};
+// PATCH: real logged-in user
+const storedUser = JSON.parse(localStorage.getItem("user"));
+
+const currentUser = storedUser
+  ? {
+      ...storedUser,
+      name:
+        storedUser.name ||
+        storedUser.username ||
+        storedUser.email ||
+        "User",
+      role: storedUser.role || "viewer",
+    }
+  : {
+      name: "Guest User",
+      role: "viewer",
+    };
+
 
 const HeritageLayout = ({ children }) => {
   const location = useLocation();
@@ -16,25 +30,28 @@ const HeritageLayout = ({ children }) => {
   const [darkMode, setDarkMode] = useState(false);
   const dropdownRef = useRef(null);
 
-  /* ------------------ Active Route ------------------ */
+  /*  Active Route  */
   const isActive = (path) => location.pathname === path;
 
-  /* ------------------ Role Based Menu ------------------ */
+  /*Role Based menu */
   const navLinks = [
     { name: "Dashboard", path: "/dashboard" },
     { name: "Upload", path: "/upload" },
     { name: "Search", path: "/search" },
     { name: "Profile", path: "/profile" },
-    ...(mockUser.role === "admin"
+    ...(currentUser.role === "admin"
       ? [{ name: "Admin", path: "/admin" }]
       : []),
   ];
 
-  /* ------------------ Initials ------------------ */
-  const initials = mockUser.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+  /*  Initials  */
+ const initials = (currentUser.name || "U")
+  .split(" ")
+  .map((n) => n[0])
+  .join("");
+
+
+
 
   /* ------------------ Click Outside Close ------------------ */
   useEffect(() => {
@@ -44,9 +61,7 @@ const HeritageLayout = ({ children }) => {
       }
     };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
+    return () => document.removeEventListener("mousedown", ha
   /* ------------------ Dark Mode ------------------ */
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -121,10 +136,12 @@ const HeritageLayout = ({ children }) => {
                   </Link>
 
                   <button
+                   
                     onClick={() => {
-                      setUserOpen(false);
-                      alert("Logout clicked");
-                    }}
+   setUserOpen(false);
+  localStorage.removeItem("user");
+  window.location.href = "/login";
+}}
                     className="w-full text-left px-4 py-3 text-sm hover:bg-heritage-beige dark:hover:bg-gray-700"
                   >
                     <div className="flex items-center gap-2">
@@ -174,7 +191,7 @@ const HeritageLayout = ({ children }) => {
             ))}
 
             <div className="border-t border-heritage-border dark:border-gray-700 pt-3 flex items-center justify-between">
-              <span className="text-sm text-gray-500">{mockUser.name}</span>
+              <span className="text-sm text-gray-500">{currentUser.name}</span>
 
               <button
                 onClick={() => setDarkMode(!darkMode)}
@@ -185,7 +202,11 @@ const HeritageLayout = ({ children }) => {
             </div>
 
             <button
-              onClick={() => alert("Logout clicked")}
+              onClick={() => {
+  localStorage.removeItem("user");
+  window.location.href = "/login";
+}}
+
               className="w-full text-left text-sm text-red-600 pt-2"
             >
               Logout
